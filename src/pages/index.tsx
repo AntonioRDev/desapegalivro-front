@@ -1,6 +1,6 @@
 import React from "react";
 import type { NextPage } from "next";
-import Layout from "../src/components/Layout/indeex";
+import Layout from "../components/Layout";
 
 const Home: NextPage = () => {
   return (
