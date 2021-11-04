@@ -13,16 +13,16 @@ const CategoriesBadge: React.FC<Props> = (props) => {
   return (
     <Flex
       bgColor="white"
-      rounded="20px"
-      py="8px"
-      px="24px"
+      rounded="1.25rem"
+      py="0.5rem"
+      px="1.5rem"
       alignItems="center"
       cursor="pointer"
       borderWidth={1}
       borderColor="gray.300"
       {...rest}
     >
-      <Icon as={icon} boxSize={8} mr="10px" />
+      <Icon as={icon} boxSize={8} mr="0.625rem" />
       <Text>{categoryName}</Text>
     </Flex>
   );

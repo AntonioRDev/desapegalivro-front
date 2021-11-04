@@ -9,12 +9,12 @@ const InputSearch: React.FC<Props> = (props) => {
     <InputGroup size="sm" rounded="md">
       <Input
         placeholder="Digite o nome do livro..."
-        pl="30px"
-        py="20px"
+        pl="1.875rem"
+        py="1.25rem"
         rounded="md"
         borderColor="gray.300"
-        minW='350px'
-        fontSize='16px'
+        minW='21.875rem'
+        fontSize='1rem'
       />
       <InputRightAddon
         children={<BsSearch color="black" />}
@@ -22,8 +22,8 @@ const InputSearch: React.FC<Props> = (props) => {
         cursor="pointer"
         rounded="md"
         borderColor="gray.300"
-        py="20px"
-        px="20px"
+        py="1.25rem"
+        px="1.25rem"
       />
     </InputGroup>
   );

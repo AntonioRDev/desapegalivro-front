@@ -6,14 +6,18 @@ const appTheme = extendTheme({
     primary: '#C03A2B',
     secondary: '#35495E'
   },
+  sizes: {
+    maxWidthLayout: '76rem'
+  },
   fonts: {
+    poppins: "'Poppins', sans-serif",
     mvBoli: "'mv-boli-regular', sans-serif",
     dancingScript: "'Dancing Script', cursive",
     aladin:
       'Aladin, sans-serif',
-    body: 'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+    body: 'poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
     heading:
-      'Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+      'poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
   },
 });
 
