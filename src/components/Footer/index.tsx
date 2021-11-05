@@ -1,10 +1,30 @@
-import React from 'react';
-import { Flex } from '@chakra-ui/react';
+import React from "react";
+import { Flex, HStack, Icon, Text } from "@chakra-ui/react";
+import { BsTwitter, BsInstagram, BsFacebook } from "react-icons/bs";
 
 export default function Footer() {
-    return (
-        <Flex height='65px' w='100%'>
-            Footer
-        </Flex>
-    )
+  return (
+    <Flex
+      height="65px"
+      w="100%"
+      justifyContent="center"
+      alignItems="center"
+      bgColor="white"
+      shadow="0px -4px 3px rgba(0, 0, 0, 0.1)"
+    >
+      <Flex maxWidth="maxWidthLayout" width='100%' justifyContent='space-between'>
+        <Text verticalAlign="center">
+          Copyright © {new Date().getFullYear()} - Todos os direitos reservados
+        </Text>
+
+        <HStack spacing="0.625rem">
+          <Icon as={BsInstagram} boxSize={6} cursor="pointer" />
+
+          <Icon as={BsFacebook} boxSize={6} cursor="pointer" />
+
+          <Icon as={BsTwitter} boxSize={6} cursor="pointer" />
+        </HStack>
+      </Flex>
+    </Flex>
+  );
 }

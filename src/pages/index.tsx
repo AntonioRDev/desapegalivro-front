@@ -55,7 +55,7 @@ const Home: NextPage = () => {
                 <BookListItem />
               </Grid>
 
-              <Flex justifyContent='center'>
+              <Flex justifyContent='center' mb='6'>
                 <HStack fontSize="lg" spacing="3rem">
                   <Flex cursor="pointer">
                     <Icon as={IoIosArrowBack} boxSize={7} mr="10px" />

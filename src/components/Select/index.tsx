@@ -1,5 +1,5 @@
-import { Select, SelectProps } from "@chakra-ui/select";
 import React from "react";
+import { Select, SelectProps } from "@chakra-ui/select";
 
 type Props = SelectProps & {};
 
