@@ -19,8 +19,8 @@ import Select from "../components/Select";
 const Home: NextPage = () => {
   return (
     <Layout>
-      <Flex justifyContent="center">
-        <Flex direction="column" maxWidth="maxWidthLayout" px="50px">
+      <Flex width='100%' justifyContent="center">
+        <Flex direction="column" maxWidth="maxWidthLayout" width='100%'>
           <Heading fontSize="xl" mt="6" mb="6" fontWeight='normal'>
             Livros que estão sendo doados no momento:
           </Heading>
@@ -43,7 +43,7 @@ const Home: NextPage = () => {
               <Select placeholder="Estado" bgColor="white"></Select>
             </VStack>
 
-            <Flex direction="column" w="100%">
+            <Flex direction="column" w="100%" alignItems='center'>
               <Grid templateColumns="1fr 1fr 1fr" gap="1.5rem" mb="8">
                 <BookListItem />
                 <BookListItem />

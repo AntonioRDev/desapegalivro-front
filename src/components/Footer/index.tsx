@@ -5,6 +5,7 @@ import { BsTwitter, BsInstagram, BsFacebook } from "react-icons/bs";
 export default function Footer() {
   return (
     <Flex
+      as='footer'
       height="65px"
       w="100%"
       justifyContent="center"

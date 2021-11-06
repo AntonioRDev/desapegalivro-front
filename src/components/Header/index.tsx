@@ -8,6 +8,7 @@ import { FaUserCircle } from "react-icons/fa";
 export default function Header() {
   return (
     <Flex
+      as='header'
       height="4.0625rem"
       w="100%"
       bgColor="white"
@@ -15,7 +16,6 @@ export default function Header() {
       justifyContent="center"
     >
       <Flex
-        px="3.125rem"
         py=".8rem"
         justifyContent="space-between"
         maxWidth="maxWidthLayout"
