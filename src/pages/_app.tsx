@@ -10,6 +10,8 @@ const appTheme = extendTheme({
   },
   sizes: {
     maxWidthLayout: "76rem",
+    headerHeight: "4.0625rem",
+    footerHeight: "4.0625rem"
   },
   fonts: {
     poppins: "'Poppins', sans-serif",

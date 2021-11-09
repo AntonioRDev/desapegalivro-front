@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <Flex
       as='footer'
-      height="65px"
+      height="4.0625rem"
       w="100%"
       justifyContent="center"
       alignItems="center"

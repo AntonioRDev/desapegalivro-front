@@ -25,7 +25,7 @@ const Home: NextPage = () => {
             Livros que estão sendo doados no momento:
           </Heading>
 
-          <HStack spacing="2.5rem" justifyContent="center" mb="6">
+          <HStack spacing="2.5rem" justifyContent="space-between" mb="6">
             <CategoriesBadge categoryName="Arte" icon={GiDualityMask} />
             <CategoriesBadge categoryName="Arte" icon={GiDualityMask} />
             <CategoriesBadge categoryName="Arte" icon={GiDualityMask} />
