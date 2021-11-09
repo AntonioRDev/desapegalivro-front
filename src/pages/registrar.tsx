@@ -18,7 +18,7 @@ const Registrar: React.FC = () => {
     <Flex justifyContent="center" w="100%" minHeight='100vh' height='100%' bgColor="#F5F0EE">
       <Flex direction="column" height='100%' maxWidth="maxWidthLayout" w="100%">
         <Flex as="header" alignItems="center" cursor="pointer" pt="8">
-          <Image src={BookLogo} />
+          <Image src={BookLogo} alt='Logo Desapega Livro'/>
 
           <Text fontFamily="dancingScript" fontSize="1.5rem" ml="0.625rem">
             Desapega Livro
@@ -27,7 +27,7 @@ const Registrar: React.FC = () => {
 
         <Flex as="main" height='100%' alignItems='center'>
           <Flex w="50%">
-            <Image src={BookSign} width={480} height={480} />
+            <Image src={BookSign} alt='Pessoa lendo livro' width={480} height={480} />
           </Flex>
 
           <Flex w="50%" alignItems='center'>

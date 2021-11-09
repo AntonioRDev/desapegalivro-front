@@ -54,7 +54,7 @@ const BookDetails: React.FC = () => {
 
           <Flex mb='8'>
             <Flex direction="column">
-              <Image src={HpBook} height={312} width={496} />
+              <Image src={HpBook} alt='Capa do livro' height={312} width={496} />
 
               <Flex pt='3' justifyContent='center'>
                 <Text>Doado por: &nbsp;</Text>

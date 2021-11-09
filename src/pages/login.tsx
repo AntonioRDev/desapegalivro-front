@@ -23,7 +23,7 @@ const Login: React.FC = () => {
     >
       <Flex direction="column" height="100%" maxWidth="maxWidthLayout" w="100%">
         <Flex as="header" alignItems="center" cursor="pointer" pt="8">
-          <Image src={BookLogo} />
+          <Image src={BookLogo} alt='Logo livro'/>
 
           <Text fontFamily="dancingScript" fontSize="1.5rem" ml="0.625rem">
             Desapega Livro
@@ -32,7 +32,7 @@ const Login: React.FC = () => {
 
         <Flex as="main" height="100%" alignItems="center">
           <Flex w="50%">
-            <Image src={BookLogin} width={480} height={480} />
+            <Image src={BookLogin} width={480} height={480} alt='Livros na estante'/>
           </Flex>
 
           <Flex w="50%" alignItems="center">

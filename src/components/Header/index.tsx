@@ -22,7 +22,7 @@ export default function Header() {
         width='100%'
       >
         <Flex alignItems="center" cursor="pointer">
-          <Image src={BookLogo} />
+          <Image src={BookLogo} alt='Logo Desapega Livro'/>
 
           <Text fontFamily="dancingScript" fontSize="1.5rem" ml="0.625rem">
             Desapega Livro

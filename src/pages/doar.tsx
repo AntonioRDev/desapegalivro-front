@@ -60,7 +60,7 @@ const Donate: React.FC = () => {
             mb='3'
           >
             <Flex mb='6'>
-              <Image src={HpBook} />
+              <Image src={HpBook} alt='Capa do livro'/>
 
               <Flex direction="column" pl='6'>
                 <Text>Imagem da capa do livro</Text>
