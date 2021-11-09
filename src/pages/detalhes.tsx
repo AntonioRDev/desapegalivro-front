@@ -17,8 +17,6 @@ import Image from "next/image";
 import HpBook from "../assets/images/hpbook.jpg";
 import Map from "../pages-components/BookDetails/Map";
 
-// import { Container } from './styles';
-
 const BookDetails: React.FC = () => {
   const { sizes } = useTheme();
 
