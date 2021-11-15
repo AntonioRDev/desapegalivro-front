@@ -1,6 +1,6 @@
 import React, { createContext } from "react";
 import Router from "next/router";
-import { setCookie, parseCookies } from "nookies";
+import { setCookie, parseCookies, destroyCookie } from "nookies";
 import { login } from "../services/auth";
 import { LoginDtoRequest } from "../models/dto/LoguinDtoRequest";
 import { User } from "../models/domain/User";
@@ -10,6 +10,7 @@ type AuthContextType = {
   isAuthenticaded: boolean;
   user: User | undefined;
   signIn: (credentials: LoginDtoRequest) => Promise<void>;
+  signOut: () => void
 };
 
 export const AuthContext = createContext({} as AuthContextType);
@@ -21,16 +22,16 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   React.useEffect(() => {
     const { desapegatoken } = parseCookies();
-    const { token, userId } = JSON.parse(desapegatoken);
-
-    if (token && userId) {
+    
+    if (desapegatoken) {
+      const { userId } = JSON.parse(desapegatoken);
+      
       getUserById(userId).then((res) => setUser(res.data));
     }
   }, []);
 
   async function signIn(credentials: LoginDtoRequest) {
     const response = await login(credentials);
-    console.log("response", response);
     const { token, user } = response.data;
 
     setCookie(
@@ -46,8 +47,13 @@ export const AuthProvider: React.FC = ({ children }) => {
     Router.push("/");
   }
 
+  async function signOut() {
+    destroyCookie(undefined, 'desapegatoken');
+    Router.push("/");
+  }
+
   return (
-    <AuthContext.Provider value={{ isAuthenticaded, signIn, user }}>
+    <AuthContext.Provider value={{ isAuthenticaded, signIn, signOut, user }}>
       {children}
     </AuthContext.Provider>
   );

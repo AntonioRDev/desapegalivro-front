@@ -107,7 +107,7 @@ export const getServerSideProps: GetServerSideProps = async (
   if (!desapegatoken) {
     return {
       redirect: {
-        destination: "/",
+        destination: "/login",
         permanent: false,
       },
     };

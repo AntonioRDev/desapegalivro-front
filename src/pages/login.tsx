@@ -126,7 +126,7 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   const { desapegatoken } = parseCookies(context);
 
-  if (!desapegatoken) {
+  if (desapegatoken) {
     return {
       redirect: {
         destination: "/",

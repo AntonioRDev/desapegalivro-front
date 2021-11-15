@@ -14,10 +14,81 @@ import BookSign from "../assets/images/book-sign.svg";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { parseCookies } from 'nookies';
+import { parseCookies } from "nookies";
+import { useDebounce } from "../utils";
+import cep from "cep-promise";
+import { states } from "../config/constants";
+import Select from "../components/Select";
+import { UserRegisterDto } from '../models/dto/UserRegisterDto';
+import { createUser } from "../services/user";
 
 const Registrar: React.FC = () => {
   const router = useRouter();
+
+  const [isLoading, setLoading] = React.useState(false);
+
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [postalCode, setPostalCode] = React.useState("");
+  const [street, setStreet] = React.useState("");
+  const [neighborhood, setNeighborhood] = React.useState("");
+  const [city, setCity] = React.useState("");
+  const [state, setState] = React.useState("");
+  const [uf, setUf] = React.useState("");
+  const [number, setNumber] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [whatsapp, setWhatsApp] = React.useState("");
+
+  const debouncedPostalCode: string = useDebounce<string>(postalCode, 500);
+
+  React.useEffect(() => {
+    if (debouncedPostalCode) {
+      cep(debouncedPostalCode).then((response) => {
+        setCity(response.city);
+        setNeighborhood(response.neighborhood);
+        setUf(response.state);
+        setStreet(response.street);
+      });
+    }
+  }, [debouncedPostalCode]);
+
+  const onSubmit = async () => {
+    if(password !== confirmPassword) {
+      //TODO: Toast
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const payload: UserRegisterDto = {
+        name,
+        email,
+        password,
+        postalCode,
+        street,
+        neighborhood,
+        city,
+        state,
+        uf,
+        number,
+        phone,
+        whatsapp
+      };
+
+      await createUser(payload);
+      
+      //TODO: toast
+      router.push("/login");
+      setLoading(false);
+    } catch (error) {
+      console.log('onSubmit error', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Flex
@@ -71,35 +142,99 @@ const Registrar: React.FC = () => {
 
               <HStack w="100%" spacing="3" mb="5">
                 <VStack w="50%" spacing="3">
-                  <Input placeholder="Nome" />
+                  <Input
+                    placeholder="Nome"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
 
-                  <Input placeholder="Senha" type="password" />
+                  <Input
+                    placeholder="Senha"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </VStack>
 
                 <VStack w="50%" spacing="3">
-                  <Input placeholder="Email" type="email" />
+                  <Input
+                    placeholder="Email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
 
-                  <Input placeholder="Confirmar senha" type="password" />
+                  <Input
+                    placeholder="Confirmar senha"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
                 </VStack>
               </HStack>
 
               <Divider mb="5" />
 
-              <HStack w="100%" spacing="3" mb="5">
+              <HStack w="100%" spacing="3" mb="5" alignItems="flex-start">
                 <VStack w="50%" spacing="3">
-                  <Input placeholder="CEP" />
+                  <Input
+                    placeholder="CEP (somente numeros)"
+                    type="text"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                  />
 
-                  <Input placeholder="Número" />
+                  <Input
+                    placeholder="Número"
+                    type="number"
+                    value={number}
+                    onChange={(e) => setNumber(e.target.value)}
+                  />
 
-                  <Input placeholder="Cidade" />
+                  <Select
+                    _placeholder={{ color: "gray" }}
+                    placeholder="Estado"
+                    bgColor="white"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  >
+                    {states.map((state) => (
+                      <option key={state.id} value={state.name}>
+                        {state.name}
+                      </option>
+                    ))}
+                  </Select>
+
+                  <Input
+                    placeholder="Cidade"
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
                 </VStack>
 
                 <VStack w="50%" spacing="3">
-                  <Input placeholder="Rua" />
+                  <Input
+                    placeholder="Rua"
+                    type="text"
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                  />
 
-                  <Input placeholder="Bairro" />
+                  <Input
+                    placeholder="Bairro"
+                    type="text"
+                    value={neighborhood}
+                    onChange={(e) => setNeighborhood(e.target.value)}
+                  />
 
-                  <Input placeholder="UF" />
+                  <Input
+                    placeholder="UF"
+                    type="text"
+                    maxLength={2}
+                    value={uf}
+                    onChange={(e) => setUf(e.target.value)}
+                  />
                 </VStack>
               </HStack>
 
@@ -107,16 +242,26 @@ const Registrar: React.FC = () => {
 
               <HStack w="100%" spacing="3" mb="5">
                 <Flex w="50%">
-                  <Input placeholder="Telefone/Celular" type="tel" />
+                  <Input
+                    placeholder="Telefone/Celular"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
                 </Flex>
 
                 <Flex w="50%">
-                  <Input placeholder="WhatsApp" type="tel" />
+                  <Input
+                    placeholder="WhatsApp"
+                    type="tel"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsApp(e.target.value)}
+                  />
                 </Flex>
               </HStack>
 
               <Flex>
-                <Button bgColor="secondary" color="white">
+                <Button bgColor="secondary" color="white" onClick={onSubmit} isLoading={isLoading} isDisabled={isLoading}>
                   Criar conta
                 </Button>
               </Flex>
@@ -133,7 +278,7 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   const { desapegatoken } = parseCookies(context);
 
-  if (!desapegatoken) {
+  if (desapegatoken) {
     return {
       redirect: {
         destination: "/",
@@ -142,8 +287,8 @@ export const getServerSideProps: GetServerSideProps = async (
     };
   } else {
     return {
-      props: {}
-    }
+      props: {},
+    };
   }
 };
 

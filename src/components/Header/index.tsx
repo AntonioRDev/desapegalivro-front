@@ -1,15 +1,29 @@
 import React, { useContext } from "react";
-import { Avatar, Button, Flex, Icon, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  Button,
+  Flex,
+  Icon,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+} from "@chakra-ui/react";
 import Image from "next/image";
 import BookLogo from "../../assets/icons/BookLogo.svg";
 import InputSearch from "./InputSearch";
-import { FaUserCircle } from "react-icons/fa";
 import { useRouter } from "next/router";
 import { AuthContext } from "../../contexts/AuthContext";
+import { HamburgerIcon } from "@chakra-ui/icons";
+import { GoSignOut } from "react-icons/go";
+import { RiHandHeartLine } from "react-icons/ri";
+import { FaRegHandPointer } from "react-icons/fa";
 
 export default function Header() {
   const router = useRouter();
-  const { user } = useContext(AuthContext);
+  const { user, signOut } = useContext(AuthContext);
 
   const [search, setSearch] = React.useState("");
 
@@ -64,6 +78,30 @@ export default function Header() {
             Doar Agora!
           </Button>
 
+          {user && (
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                aria-label="Opções"
+                icon={<HamburgerIcon color='secondary'/>}
+                variant="outline"
+                ml="1.875rem"
+                borderColor='secondary'
+              />
+              <MenuList>
+                <MenuItem icon={<Icon as={FaRegHandPointer} />} onClick={() => router.push("/minhas-candidaturas")}>
+                  Minhas candidaturas
+                </MenuItem>
+
+                <MenuItem icon={<Icon as={RiHandHeartLine} />} onClick={() => router.push("/minhas-doacoes")}>
+                  Minhas doações
+                </MenuItem>
+
+                <MenuItem icon={<Icon as={GoSignOut} />} onClick={() => signOut()}>Sair</MenuItem>
+              </MenuList>
+            </Menu>
+          )}
+
           <Avatar
             src={
               user
@@ -72,9 +110,9 @@ export default function Header() {
                     .join("+")}`
                 : ""
             }
-            cursor={user ? 'default' : 'pointer'}
+            cursor={user ? "default" : "pointer"}
             ml="1.875rem"
-            onClick={() => user ? null : router.push("/login")}
+            onClick={() => (user ? null : router.push("/login"))}
           />
         </Flex>
       </Flex>

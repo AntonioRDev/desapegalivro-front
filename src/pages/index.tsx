@@ -53,7 +53,6 @@ const Home: NextPage<Props> = (props) => {
 
   React.useEffect(() => {
     (async () => {
-      console.log("props", props);
       if (router.query["busca"]) {
         setSearchFilter(router.query.busca as string);
       }
@@ -70,7 +69,6 @@ const Home: NextPage<Props> = (props) => {
     updateFilters();
   }, [searchFilter, selectedState, selectedCity]);
 
-  // TODO:Fazer primeira busca SSR
   const fetchBooks = async () => {
     setLoading(true);
 

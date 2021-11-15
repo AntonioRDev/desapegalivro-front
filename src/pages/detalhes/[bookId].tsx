@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,6 +11,7 @@ import {
   useTheme,
   VStack,
   Image,
+  Badge,
 } from "@chakra-ui/react";
 import Layout from "../../components/Layout";
 import { ChevronRightIcon } from "@chakra-ui/icons";
@@ -18,7 +19,9 @@ import Map from "../../pages-components/BookDetails/Map";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { getBookById } from "../../services/books";
 import { DonatedBook } from "../../models/domain/DonatedBook";
-import { parseCookies } from "nookies";
+import ApplicationModal from "../../pages-components/BookDetails/ApplicationModal";
+import { AuthContext } from "../../contexts/AuthContext";
+import { useRouter } from "next/router";
 
 type Props = {
   book: DonatedBook;
@@ -26,11 +29,23 @@ type Props = {
 
 const BookDetails: NextPage<Props> = (props) => {
   const { sizes } = useTheme();
+  const router = useRouter();
+  const { isAuthenticaded } = useContext(AuthContext);
+
   const [book, setBook] = React.useState(props.book);
+  const [isApplicationModalOpen, setApplicationModal] = React.useState(false);
 
   React.useEffect(() => {
     console.log("props", props);
   }, []);
+
+  const onAplly = () => {
+    if(!isAuthenticaded) {
+      router.push("/login");
+    }
+    
+    setApplicationModal(true);
+  }
 
   return (
     <Layout>
@@ -91,7 +106,7 @@ const BookDetails: NextPage<Props> = (props) => {
 
               <VStack spacing="2" alignItems="flex-start" pl="6">
                 <Text>
-                  Categoria: <b>{book.category.name}</b>
+                  Categoria: <Badge colorScheme="green"><b>{book.category.name}</b></Badge>
                 </Text>
 
                 <Text>
@@ -112,7 +127,7 @@ const BookDetails: NextPage<Props> = (props) => {
               </VStack>
 
               <Flex justifyContent="center" w="100%">
-                <Button bgColor="primary" color="white">
+                <Button bgColor="primary" color="white" onClick={onAplly}>
                   Candidatar para receber
                 </Button>
               </Flex>
@@ -152,6 +167,12 @@ const BookDetails: NextPage<Props> = (props) => {
           </Flex>
         </Flex>
       </Flex>
+
+      <ApplicationModal
+        isOpen={isApplicationModalOpen}
+        onClose={() => setApplicationModal(false)}
+        book={book}
+      />
     </Layout>
   );
 };
