@@ -16,6 +16,8 @@ import {
 import Layout from "../components/Layout";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import ApplicationCard from "../pages-components/MyApplications/ApplicationCard";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { parseCookies } from 'nookies';
 
 const MyApplications: React.FC = () => {
   const { sizes } = useTheme();
@@ -87,6 +89,25 @@ const MyApplications: React.FC = () => {
       </Flex>
     </Layout>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { desapegatoken } = parseCookies(context);
+
+  if (!desapegatoken) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      props: {}
+    }
+  }
 };
 
 export default MyApplications;

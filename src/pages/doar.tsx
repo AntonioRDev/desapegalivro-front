@@ -17,6 +17,8 @@ import Layout from "../components/Layout";
 import Image from "next/image";
 import HpBook from "../assets/images/hpbook.jpg";
 import Select from "../components/Select";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { parseCookies } from 'nookies';
 
 const Donate: React.FC = () => {
   const { sizes } = useTheme();
@@ -95,6 +97,25 @@ const Donate: React.FC = () => {
       </Flex>
     </Layout>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { desapegatoken } = parseCookies(context);
+
+  if (!desapegatoken) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      props: {}
+    }
+  }
 };
 
 export default Donate;

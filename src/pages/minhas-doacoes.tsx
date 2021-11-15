@@ -16,6 +16,8 @@ import { ChevronRightIcon } from "@chakra-ui/icons";
 import Layout from "../components/Layout";
 import DonationCard from "../pages-components/MyDonations/DonationCard";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { parseCookies } from 'nookies';
 
 const MyDonations: React.FC = () => {
   const { sizes } = useTheme();
@@ -87,6 +89,25 @@ const MyDonations: React.FC = () => {
       </Flex>
     </Layout>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const { desapegatoken } = parseCookies(context);
+
+  if (!desapegatoken) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      props: {}
+    }
+  }
 };
 
 export default MyDonations;

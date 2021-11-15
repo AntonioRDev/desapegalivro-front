@@ -1,14 +1,26 @@
-import React from "react";
-import { Button, Flex, Icon, Text } from "@chakra-ui/react";
+import React, { useContext } from "react";
+import { Avatar, Button, Flex, Icon, Text } from "@chakra-ui/react";
 import Image from "next/image";
 import BookLogo from "../../assets/icons/BookLogo.svg";
 import InputSearch from "./InputSearch";
 import { FaUserCircle } from "react-icons/fa";
+import { useRouter } from "next/router";
+import { AuthContext } from "../../contexts/AuthContext";
 
 export default function Header() {
+  const router = useRouter();
+  const { user } = useContext(AuthContext);
+
+  const [search, setSearch] = React.useState("");
+
+  const onSearchSubmit = () => {
+    const pathUrl = `/?busca=${search}`;
+    window.location.href = encodeURI(pathUrl);
+  };
+
   return (
     <Flex
-      as='header'
+      as="header"
       height="4.0625rem"
       w="100%"
       bgColor="white"
@@ -19,10 +31,14 @@ export default function Header() {
         py=".8rem"
         justifyContent="space-between"
         maxWidth="maxWidthLayout"
-        width='100%'
+        width="100%"
       >
-        <Flex alignItems="center" cursor="pointer">
-          <Image src={BookLogo} alt='Logo Desapega Livro'/>
+        <Flex
+          alignItems="center"
+          cursor="pointer"
+          onClick={() => router.push("/")}
+        >
+          <Image src={BookLogo} alt="Logo Desapega Livro" />
 
           <Text fontFamily="dancingScript" fontSize="1.5rem" ml="0.625rem">
             Desapega Livro
@@ -30,7 +46,11 @@ export default function Header() {
         </Flex>
 
         <Flex>
-          <InputSearch />
+          <InputSearch
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onSearchSubmit={onSearchSubmit}
+          />
         </Flex>
 
         <Flex alignItems="center">
@@ -39,16 +59,22 @@ export default function Header() {
             variant="outline"
             borderColor="secondary"
             color="secondary"
+            onClick={() => router.push("/doar")}
           >
             Doar Agora!
           </Button>
 
-          <Icon
-            as={FaUserCircle}
-            color="secondary"
-            boxSize={9}
-            cursor="pointer"
+          <Avatar
+            src={
+              user
+                ? `https://ui-avatars.com/api/?name=${user.name
+                    .split(" ")
+                    .join("+")}`
+                : ""
+            }
+            cursor={user ? 'default' : 'pointer'}
             ml="1.875rem"
+            onClick={() => user ? null : router.push("/login")}
           />
         </Flex>
       </Flex>

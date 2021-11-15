@@ -1,8 +1,14 @@
-import { InputGroup, Input, InputRightAddon } from "@chakra-ui/react";
+import { InputGroup, Input, InputProps, InputRightAddon } from "@chakra-ui/react";
 import React from "react";
 import { BsSearch } from "react-icons/bs";
 
-const InputSearch: React.FC = () => {
+type Props = InputProps & {
+  onSearchSubmit: () => void;
+}
+
+const InputSearch: React.FC<Props> = (props) => {
+  const { onSearchSubmit, ...rest} = props;
+
   return (
     <InputGroup size="sm" rounded="md">
       <Input
@@ -13,6 +19,7 @@ const InputSearch: React.FC = () => {
         borderColor="gray.300"
         minW="21.875rem"
         fontSize="1rem"
+        {...rest}
       />
       <InputRightAddon
         bgColor="transparent"
@@ -21,6 +28,7 @@ const InputSearch: React.FC = () => {
         borderColor="gray.300"
         py="1.25rem"
         px="1.25rem"
+        onClick={() => onSearchSubmit()}
       >
         <BsSearch color="black" />
       </InputRightAddon>

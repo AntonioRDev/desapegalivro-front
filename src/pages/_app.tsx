@@ -2,6 +2,7 @@ import "../config/global.css";
 import type { AppProps } from "next/app";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import Head from "next/head";
+import { AuthProvider } from "../contexts/AuthContext";
 
 const appTheme = extendTheme({
   colors: {
@@ -32,7 +33,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
 
       <ChakraProvider theme={appTheme} resetCSS>
-        <Component {...pageProps} />
+        <AuthProvider>
+          <Component {...pageProps} />
+        </AuthProvider>
       </ChakraProvider>
     </>
   );

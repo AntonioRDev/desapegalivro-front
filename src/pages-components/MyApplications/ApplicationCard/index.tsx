@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Divider, Flex, Switch, Text } from "@chakra-ui/react";
+import { Box, Divider, Flex, Text } from "@chakra-ui/react";
 import Image from "next/image";
 import HpBook from "../../../assets/images/hpbook.jpg";
 
