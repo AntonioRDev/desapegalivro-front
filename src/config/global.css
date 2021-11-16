@@ -3,3 +3,7 @@ html, body, #__next {
 	width: 100%;
 	overflow-x: hidden;
 }
+
+input[type="file"] {
+    display: none;
+}
