@@ -15,6 +15,7 @@
     "@emotion/styled": "^11.3.0",
     "axios": "^0.24.0",
     "cep-promise": "^4.1.1",
+    "date-fns": "^2.25.0",
     "framer-motion": "^4.1.17",
     "mapbox-gl": "^2.6.0",
     "next": "12.0.0",

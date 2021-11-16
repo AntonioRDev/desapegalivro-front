@@ -15,6 +15,7 @@ import {
 import { DonatedBook } from "../../../models/domain/DonatedBook";
 import { applyToReceiveBook } from "../../../services/application";
 import { AuthContext } from "../../../contexts/AuthContext";
+import { useRouter } from "next/router";
 
 type Props = {
   book: DonatedBook;
@@ -24,6 +25,7 @@ type Props = {
 
 const ApplicationModal: React.FC<Props> = ({ book, isOpen, onClose }) => {
   const { user } = useContext(AuthContext);
+  const router = useRouter();
 
   const [description, setDescription] = React.useState("");
   const [isLoading, setLoading] = React.useState(false);
@@ -47,6 +49,7 @@ const ApplicationModal: React.FC<Props> = ({ book, isOpen, onClose }) => {
 
       const response = await applyToReceiveBook(params);
       setLoading(false);
+      router.push("/minhas-candidaturas");
       console.log("response", response);
     } catch (error) {
       console.log("handleApply error", error);

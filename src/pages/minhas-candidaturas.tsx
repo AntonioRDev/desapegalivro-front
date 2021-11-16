@@ -16,10 +16,16 @@ import {
 import Layout from "../components/Layout";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import ApplicationCard from "../pages-components/MyApplications/ApplicationCard";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { parseCookies } from 'nookies';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
+import { parseCookies } from "nookies";
+import { Application } from "../models/domain/Application";
+import { getApplicationsByUser } from "../services/application";
 
-const MyApplications: React.FC = () => {
+type Props = {
+  applications: Application[];
+};
+
+const MyApplications: NextPage<Props> = ({ applications }) => {
   const { sizes } = useTheme();
 
   return (
@@ -55,21 +61,18 @@ const MyApplications: React.FC = () => {
 
           <Divider mb="3" />
 
-          <Heading mb="6" fontSize='1.5rem'>Livros que me candidatei para receber:</Heading>
+          <Heading mb="6" fontSize="1.5rem">
+            Livros que me candidatei para receber:
+          </Heading>
 
           <Flex direction="column">
             <Grid templateColumns="1fr 1fr 1fr" gap="1rem" mb="8">
-              <ApplicationCard />
-              <ApplicationCard />
-              <ApplicationCard />
-              <ApplicationCard />
-              <ApplicationCard />
-              <ApplicationCard />
-              <ApplicationCard />
-              <ApplicationCard />
+              {applications.map((application) => (
+                <ApplicationCard application={application} />
+              ))}
             </Grid>
 
-            <Flex justifyContent="center" mb="6">
+            {/* <Flex justifyContent="center" mb="6">
               <HStack fontSize="lg" spacing="3rem">
                 <Flex cursor="pointer">
                   <Icon as={IoIosArrowBack} boxSize={7} mr="10px" />
@@ -83,7 +86,7 @@ const MyApplications: React.FC = () => {
                   <Icon as={IoIosArrowForward} boxSize={7} ml="10px" />
                 </Flex>
               </HStack>
-            </Flex>
+            </Flex> */}
           </Flex>
         </Flex>
       </Flex>
@@ -95,7 +98,7 @@ export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   const { desapegatoken } = parseCookies(context);
-
+  console.log("desapegatoken", desapegatoken);
   if (!desapegatoken) {
     return {
       redirect: {
@@ -104,9 +107,15 @@ export const getServerSideProps: GetServerSideProps = async (
       },
     };
   } else {
+    const { userId } = JSON.parse(desapegatoken);
+
+    const applicatons = await getApplicationsByUser(userId);
+
     return {
-      props: {}
-    }
+      props: {
+        applications: applicatons.data,
+      },
+    };
   }
 };
 

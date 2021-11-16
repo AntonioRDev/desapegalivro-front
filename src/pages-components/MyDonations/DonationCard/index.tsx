@@ -1,34 +1,85 @@
 import React from "react";
-import { Button, Divider, Flex, Switch, Text } from "@chakra-ui/react";
-import Image from "next/image";
-import HpBook from "../../../assets/images/hpbook.jpg";
+import {
+  Button,
+  Divider,
+  Flex,
+  Switch,
+  Text,
+  Image,
+  Badge,
+  VStack,
+} from "@chakra-ui/react";
+import { DonatedBook } from "../../../models/domain/DonatedBook";
+import format from "date-fns/format";
+import { toggleBookStatus } from "../../../services/books";
 
-const DonationCard: React.FC = () => {
+type Props = {
+  book: DonatedBook;
+};
+
+const DonationCard: React.FC<Props> = ({ book }) => {
+  const [isActive, setIsActive] = React.useState(book.isActive);
+  const [isLoading, setLoading] = React.useState(false);
+
+  const onToggleStatus = async () => {
+    try {
+      setLoading(true);
+
+      await toggleBookStatus(book.id.toString());
+
+      setIsActive(!isActive);
+      setLoading(false);
+    } catch (error) {
+      console.log("onToggleStatus error", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Flex bgColor='white' borderWidth={1} borderColor='gray.400' rounded='lg' p='3' width='fit-content'>
+    <Flex
+      bgColor="white"
+      borderWidth={1}
+      borderColor="gray.400"
+      rounded="lg"
+      p="2"
+    >
       <Flex>
-        <Image src={HpBook} height={200} width={200}/>
+        <Image src={book.bookCoverUrl} height={200} width={200} />
       </Flex>
 
-      <Flex direction='column'>
-        <Text>Título</Text>
-        <Text>Categoria</Text>
+      <VStack pl="2">
+        <Text fontWeight="bold" color="primary">
+          {book.title}
+        </Text>
+
+        <Badge colorScheme="green">
+          <Text textAlign="center">{book.category.name}</Text>
+        </Badge>
 
         <Divider />
 
-        <Text>Contatos recebidos: 0</Text>
+        <Text textAlign="center">
+          Contatos recebidos: {book.applicationsQty}
+        </Text>
+
         <Text>Data do cadastro:</Text>
-        <Text> 17/10/2021</Text>
+        <Text> {format(new Date(book.createdAt), "dd/MM/yyyy")}</Text>
 
         <Flex>
           <Text>Mostrar no site:</Text>
-          <Switch />
+          <Switch
+            isChecked={isActive}
+            onChange={() => onToggleStatus()}
+            ml="2"
+            isDisabled={isLoading}
+          />
         </Flex>
 
-        <Flex justifyContent='center'>
+        {/* <Flex justifyContent='center'>
           <Button bgColor="primary" color="white">Editar</Button>
-        </Flex>
-      </Flex>
+        </Flex> */}
+      </VStack>
     </Flex>
   );
 };

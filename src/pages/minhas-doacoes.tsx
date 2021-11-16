@@ -16,10 +16,16 @@ import { ChevronRightIcon } from "@chakra-ui/icons";
 import Layout from "../components/Layout";
 import DonationCard from "../pages-components/MyDonations/DonationCard";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { parseCookies } from 'nookies';
+import { getByUser } from "../services/books";
+import { DonatedBook } from "../models/domain/DonatedBook";
 
-const MyDonations: React.FC = () => {
+type Props = {
+  books: DonatedBook[];
+};
+
+const MyDonations: NextPage<Props> = ({ books }) => {
   const { sizes } = useTheme();
 
   return (
@@ -55,21 +61,16 @@ const MyDonations: React.FC = () => {
 
           <Divider mb="3" />
 
-          <Heading mb="6">Livros cadastrados para doação:</Heading>
+          <Heading mb="6" fontSize='2xl'>Livros cadastrados para doação:</Heading>
 
           <Flex direction="column">
             <Grid templateColumns="1fr 1fr 1fr" gap="1.5rem" mb="8">
-              <DonationCard />
-              <DonationCard />
-              <DonationCard />
-              <DonationCard />
-              <DonationCard />
-              <DonationCard />
-              <DonationCard />
-              <DonationCard />
+              {books.map(book => (
+                <DonationCard key={book.id} book={book}/>
+              ))} 
             </Grid>
 
-            <Flex justifyContent="center" mb="6">
+            {/* <Flex justifyContent="center" mb="6">
               <HStack fontSize="lg" spacing="3rem">
                 <Flex cursor="pointer">
                   <Icon as={IoIosArrowBack} boxSize={7} mr="10px" />
@@ -83,7 +84,7 @@ const MyDonations: React.FC = () => {
                   <Icon as={IoIosArrowForward} boxSize={7} ml="10px" />
                 </Flex>
               </HStack>
-            </Flex>
+            </Flex> */}
           </Flex>
         </Flex>
       </Flex>
@@ -104,8 +105,14 @@ export const getServerSideProps: GetServerSideProps = async (
       },
     };
   } else {
+    const { userId } = JSON.parse(desapegatoken); 
+
+    const books = await getByUser(userId);
+
     return {
-      props: {}
+      props: {
+        books: books.data
+      }
     }
   }
 };
