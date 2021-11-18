@@ -68,7 +68,7 @@ const MyApplications: NextPage<Props> = ({ applications }) => {
           <Flex direction="column">
             <Grid templateColumns="1fr 1fr 1fr" gap="1rem" mb="8">
               {applications.map((application) => (
-                <ApplicationCard application={application} />
+                <ApplicationCard key={application.id} application={application} />
               ))}
             </Grid>
 

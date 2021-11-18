@@ -63,10 +63,13 @@ const Home: NextPage<Props> = (props) => {
         await fetchBooks();
       }
     })();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {
     updateFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchFilter, selectedState, selectedCity]);
 
   const fetchBooks = async () => {

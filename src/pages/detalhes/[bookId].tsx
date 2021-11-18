@@ -35,10 +35,6 @@ const BookDetails: NextPage<Props> = (props) => {
   const [book, setBook] = React.useState(props.book);
   const [isApplicationModalOpen, setApplicationModal] = React.useState(false);
 
-  React.useEffect(() => {
-    console.log("props", props);
-  }, []);
-
   const onAplly = () => {
     if(!isAuthenticaded) {
       router.push("/login");
