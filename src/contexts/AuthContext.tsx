@@ -49,7 +49,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   async function signOut() {
     destroyCookie(undefined, 'desapegatoken');
-    Router.push("/");
+    Router.reload();
   }
 
   return (
