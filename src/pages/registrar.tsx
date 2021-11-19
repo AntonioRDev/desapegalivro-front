@@ -3,9 +3,12 @@ import {
   Button,
   Divider,
   Flex,
+  FormControl,
+  FormErrorMessage,
   Heading,
   HStack,
   Input,
+  Select,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -15,48 +18,99 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { parseCookies } from "nookies";
-import { useDebounce } from "../utils";
 import cep from "cep-promise";
 import { states } from "../config/constants";
-import Select from "../components/Select";
-import { UserRegisterDto } from '../models/dto/UserRegisterDto';
+import { UserRegisterDto } from "../models/dto/UserRegisterDto";
 import { createUser } from "../services/user";
+import * as yup from "yup";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useToast } from "@chakra-ui/react";
+import debounce from "debounce";
+
+type FormValues = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  postalCode: string;
+  street: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  uf: string;
+  number: string;
+  phone: string;
+  whatsapp: string;
+};
+
+const validationSchema = yup.object().shape({
+  name: yup.string().max(100).required("Você precisa preencher este campo"),
+  email: yup.string().email("Email inválido").max(100).required("Você precisa preencher este campo"),
+  password: yup.string().max(100).required("Você precisa preencher este campo"),
+  confirmPassword: yup
+    .string()
+    .max(100)
+    .oneOf([yup.ref("password"), null], "As senhas precisam ser iguais"),
+  postalCode: yup
+    .string()
+    .max(100)
+    .required("Você precisa preencher este campo"),
+  street: yup.string().max(100).required("Você precisa preencher este campo"),
+  neighborhood: yup
+    .string()
+    .max(100)
+    .required("Você precisa preencher este campo"),
+  city: yup.string().max(100).required("Você precisa preencher este campo"),
+  state: yup.string().max(100).required("Você precisa preencher este campo"),
+  uf: yup.string().max(2).required("Você precisa preencher este campo"),
+  number: yup.string().max(100).required("Você precisa preencher este campo"),
+  phone: yup.string().max(100).required("Você precisa preencher este campo"),
+  whatsapp: yup.string().max(100).required("Você precisa preencher este campo"),
+});
 
 const Registrar: React.FC = () => {
   const router = useRouter();
+  const toast = useToast();
 
   const [isLoading, setLoading] = React.useState(false);
 
-  const [name, setName] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [postalCode, setPostalCode] = React.useState("");
-  const [street, setStreet] = React.useState("");
-  const [neighborhood, setNeighborhood] = React.useState("");
-  const [city, setCity] = React.useState("");
-  const [state, setState] = React.useState("");
-  const [uf, setUf] = React.useState("");
-  const [number, setNumber] = React.useState("");
-  const [phone, setPhone] = React.useState("");
-  const [whatsapp, setWhatsApp] = React.useState("");
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    resolver: yupResolver(validationSchema),
+    mode: "onBlur",
+  });
 
-  const debouncedPostalCode: string = useDebounce<string>(postalCode, 500);
+  const onSubmit = async (data: FormValues) => {
+    const {
+      name,
+      email,
+      password,
+      confirmPassword,
+      postalCode,
+      street,
+      neighborhood,
+      city,
+      state,
+      uf,
+      number,
+      phone,
+      whatsapp,
+    } = data;
 
-  React.useEffect(() => {
-    if (debouncedPostalCode) {
-      cep(debouncedPostalCode).then((response) => {
-        setCity(response.city);
-        setNeighborhood(response.neighborhood);
-        setUf(response.state);
-        setStreet(response.street);
+    if (password !== confirmPassword) {
+      toast({
+        title: "Erro ao fazer cadastro",
+        description: "A senha e a confirmação não se coincidem",
+        status: "error",
+        position: "top-right",
+        duration: 4000,
+        isClosable: true,
       });
-    }
-  }, [debouncedPostalCode]);
-
-  const onSubmit = async () => {
-    if(password !== confirmPassword) {
-      //TODO: Toast
       return;
     }
 
@@ -75,18 +129,46 @@ const Registrar: React.FC = () => {
         uf,
         number,
         phone,
-        whatsapp
+        whatsapp,
       };
 
       await createUser(payload);
-      
-      //TODO: toast
+
+      toast({
+        title: "Sucesso ao fazer cadastro!",
+        description: "Agora você pode realizar o login para entrar no sistema",
+        status: "success",
+        position: "top-right",
+        duration: 3000,
+        isClosable: true,
+      });
+
       router.push("/login");
       setLoading(false);
     } catch (error) {
-      console.log('onSubmit error', error);
+      console.log("onSubmit error", error);
+      toast({
+        title: "Erro ao fazer cadastro",
+        description: "Ocorreu um erro ao fazer o cadastro, tente novamente mais tarde",
+        status: "error",
+        position: "top-right",
+        duration: 4000,
+        isClosable: true,
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkPostalCode = async(postalCode: string) => {
+    try {
+      const response = await cep(postalCode);
+      setValue("city", response.city, { shouldValidate: true });
+      setValue("neighborhood", response.neighborhood, { shouldValidate: true });
+      setValue("uf", response.state, { shouldValidate: true });
+      setValue("street", response.street, { shouldValidate: true });
+    } catch(error) {
+      console.log('checkPostalCode', error);
     }
   };
 
@@ -124,148 +206,217 @@ const Registrar: React.FC = () => {
           </Flex>
 
           <Flex w="50%" alignItems="center">
-            <Flex
-              as="form"
-              direction="column"
-              alignItems="center"
-              shadow="lg"
-              bgColor="white"
-              borderWidth={1}
-              borderColor="gray.300"
-              rounded="lg"
-              p="8"
-              height="fit-content"
-            >
-              <Heading fontSize="x-large" textAlign="center" mb="5">
-                Crie uma conta para poder doar e receber livros!
-              </Heading>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <Flex
+                direction="column"
+                alignItems="center"
+                shadow="lg"
+                bgColor="white"
+                borderWidth={1}
+                borderColor="gray.300"
+                rounded="lg"
+                p="8"
+                height="fit-content"
+              >
+                <Heading fontSize="x-large" textAlign="center" mb="5">
+                  Crie uma conta para poder doar e receber livros!
+                </Heading>
 
-              <HStack w="100%" spacing="3" mb="5">
-                <VStack w="50%" spacing="3">
-                  <Input
-                    placeholder="Nome"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
+                <HStack w="100%" spacing="3" mb="5">
+                  <VStack w="50%" spacing="3">
+                    <FormControl isInvalid={!!errors.name}>
+                      <Input placeholder="Nome" {...register("name")} />
 
-                  <Input
-                    placeholder="Senha"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </VStack>
+                      <FormErrorMessage>
+                        {errors.name?.message}
+                      </FormErrorMessage>
+                    </FormControl>
 
-                <VStack w="50%" spacing="3">
-                  <Input
-                    placeholder="Email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+                    <FormControl isInvalid={!!errors.password}>
+                      <Input
+                        placeholder="Senha"
+                        type="password"
+                        {...register("password")}
+                      />
 
-                  <Input
-                    placeholder="Confirmar senha"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </VStack>
-              </HStack>
+                      <FormErrorMessage>
+                        {errors.password?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </VStack>
 
-              <Divider mb="5" />
+                  <VStack w="50%" spacing="3">
+                    <FormControl isInvalid={!!errors.email}>
+                      <Input
+                        placeholder="Email"
+                        type="email"
+                        {...register("email")}
+                      />
 
-              <HStack w="100%" spacing="3" mb="5" alignItems="flex-start">
-                <VStack w="50%" spacing="3">
-                  <Input
-                    placeholder="CEP (somente numeros)"
-                    type="text"
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                  />
+                      <FormErrorMessage>
+                        {errors.email?.message}
+                      </FormErrorMessage>
+                    </FormControl>
 
-                  <Input
-                    placeholder="Número"
-                    type="number"
-                    value={number}
-                    onChange={(e) => setNumber(e.target.value)}
-                  />
+                    <FormControl isInvalid={!!errors.confirmPassword}>
+                      <Input
+                        placeholder="Confirmar senha"
+                        type="password"
+                        {...register("confirmPassword")}
+                      />
 
-                  <Select
-                    _placeholder={{ color: "gray" }}
-                    placeholder="Estado"
-                    bgColor="white"
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
+                      <FormErrorMessage>
+                        {errors.confirmPassword?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </VStack>
+                </HStack>
+
+                <Divider mb="5" />
+
+                <HStack w="100%" spacing="3" mb="5" alignItems="flex-start">
+                  <VStack w="50%" spacing="3">
+                    <FormControl isInvalid={!!errors.postalCode}>
+                      <Input
+                        placeholder="CEP (somente numeros)"
+                        {...register("postalCode")}
+                        onChange={debounce((e) => {
+                          checkPostalCode(e.target.value);
+                        }, 500)}
+                      />
+
+                      <FormErrorMessage>
+                        {errors.postalCode?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+
+                    <FormControl isInvalid={!!errors.number}>
+                      <Input
+                        placeholder="Número"
+                        type="number"
+                        {...register("number")}
+                      />
+
+                      <FormErrorMessage>
+                        {errors.number?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+
+                    <FormControl isInvalid={!!errors.state}>
+                      <Select
+                        _placeholder={{ color: "gray" }}
+                        placeholder="Estado"
+                        bgColor="white"
+                        {...register("state")}
+                      >
+                        {states.map((state) => (
+                          <option key={state.id} value={state.name}>
+                            {state.name}
+                          </option>
+                        ))}
+                      </Select>
+
+                      <FormErrorMessage>
+                        {errors.state?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+
+                    <FormControl isInvalid={!!errors.city}>
+                      <Input
+                        placeholder="Cidade"
+                        type="text"
+                        {...register("city")}
+                      />
+
+                      <FormErrorMessage>
+                        {errors.city?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </VStack>
+
+                  <VStack w="50%" spacing="3">
+                    <FormControl isInvalid={!!errors.street}>
+                      <Input
+                        placeholder="Rua"
+                        type="text"
+                        {...register("street")}
+                      />
+
+                      <FormErrorMessage>
+                        {errors.street?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+
+                    <FormControl isInvalid={!!errors.neighborhood}>
+                      <Input
+                        placeholder="Bairro"
+                        type="text"
+                        {...register("neighborhood")}
+                      />
+
+                      <FormErrorMessage>
+                        {errors.neighborhood?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+
+                    <FormControl isInvalid={!!errors.uf}>
+                      <Input
+                        placeholder="UF"
+                        type="text"
+                        maxLength={2}
+                        {...register("uf")}
+                      />
+
+                      <FormErrorMessage>{errors.uf?.message}</FormErrorMessage>
+                    </FormControl>
+                  </VStack>
+                </HStack>
+
+                <Divider mb="5" />
+
+                <HStack w="100%" spacing="3" mb="5">
+                  <Flex w="50%">
+                    <FormControl isInvalid={!!errors.phone}>
+                      <Input
+                        placeholder="Telefone/Celular"
+                        type="tel"
+                        {...register("phone")}
+                      />
+
+                      <FormErrorMessage>
+                        {errors.phone?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </Flex>
+
+                  <Flex w="50%">
+                    <FormControl isInvalid={!!errors.whatsapp}>
+                      <Input
+                        placeholder="Telefone/Celular"
+                        type="tel"
+                        {...register("whatsapp")}
+                      />
+
+                      <FormErrorMessage>
+                        {errors.whatsapp?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+                  </Flex>
+                </HStack>
+
+                <Flex>
+                  <Button
+                    bgColor="secondary"
+                    color="white"
+                    type="submit"
+                    isLoading={isLoading}
+                    isDisabled={!isValid || isLoading}
                   >
-                    {states.map((state) => (
-                      <option key={state.id} value={state.name}>
-                        {state.name}
-                      </option>
-                    ))}
-                  </Select>
-
-                  <Input
-                    placeholder="Cidade"
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                  />
-                </VStack>
-
-                <VStack w="50%" spacing="3">
-                  <Input
-                    placeholder="Rua"
-                    type="text"
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                  />
-
-                  <Input
-                    placeholder="Bairro"
-                    type="text"
-                    value={neighborhood}
-                    onChange={(e) => setNeighborhood(e.target.value)}
-                  />
-
-                  <Input
-                    placeholder="UF"
-                    type="text"
-                    maxLength={2}
-                    value={uf}
-                    onChange={(e) => setUf(e.target.value)}
-                  />
-                </VStack>
-              </HStack>
-
-              <Divider mb="5" />
-
-              <HStack w="100%" spacing="3" mb="5">
-                <Flex w="50%">
-                  <Input
-                    placeholder="Telefone/Celular"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
+                    Criar conta
+                  </Button>
                 </Flex>
-
-                <Flex w="50%">
-                  <Input
-                    placeholder="WhatsApp"
-                    type="tel"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsApp(e.target.value)}
-                  />
-                </Flex>
-              </HStack>
-
-              <Flex>
-                <Button bgColor="secondary" color="white" onClick={onSubmit} isLoading={isLoading} isDisabled={isLoading}>
-                  Criar conta
-                </Button>
               </Flex>
-            </Flex>
+            </form>
           </Flex>
         </Flex>
       </Flex>

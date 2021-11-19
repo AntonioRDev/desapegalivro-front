@@ -26,24 +26,24 @@ type FormValues = {
   password: string;
 };
 
+const validationSchema = yup.object().shape({
+  email: yup
+    .string()
+    .max(100)
+    .email("O email digitado é inválido")
+    .required("Você precisa digitar o campo e-mail"),
+  password: yup
+    .string()
+    .max(100)
+    .required("Você precisa digitar a sua senha"),
+});
+
 const Login: React.FC = () => {
   const router = useRouter();
   const { signIn } = useContext(AuthContext);
   const toast = useToast();
 
   const [isLoading, setLoading] = React.useState(false);
-
-  const validationSchema = yup.object().shape({
-    email: yup
-      .string()
-      .max(100)
-      .email("O email digitado é inválido")
-      .required("Você precisa digitar o campo e-mail"),
-    password: yup
-      .string()
-      .max(100)
-      .required("Você precisa digitar a sua senha"),
-  });
 
   const { register, handleSubmit, formState:{ errors, isValid } } = useForm<FormValues>({
     resolver: yupResolver(validationSchema),
