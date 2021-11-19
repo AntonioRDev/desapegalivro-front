@@ -13,6 +13,7 @@ import {
   Heading,
   HStack,
   Icon,
+  Spinner,
   Text,
   useTheme,
   VStack,
@@ -23,9 +24,14 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import BookListItem from "../pages-components/Home/BookListItem";
 import Select from "../components/Select";
 import { DonatedBook } from "../models/domain/DonatedBook";
-import { getBooks, getFilteredBooks } from "../services/books";
+import {
+  getBooks,
+  getBooksWithoutUserBooks,
+  getFilteredBooks,
+} from "../services/books";
 import { states, cities, City } from "../config/constants";
 import FilterBadge from "../pages-components/Home/FilterBadge";
+import { parseCookies } from "nookies";
 
 export type FilterParams = {
   label: string;
@@ -75,9 +81,22 @@ const Home: NextPage<Props> = (props) => {
   const fetchBooks = async () => {
     setLoading(true);
 
+    const { desapegatoken } = parseCookies();
+
     try {
-      const response = await getBooks();
-      setBooks(response.data);
+      if (desapegatoken) {
+        const { userId } = JSON.parse(desapegatoken);
+
+        if (userId) {
+          const response = await getBooksWithoutUserBooks(userId);
+          console.log(response);
+          setBooks(response.data);
+        }
+      } else {
+        const response = await getBooks();
+        console.log(response);
+        setBooks(response.data);
+      }
     } catch (err) {
       // Toast
       console.log("fetchBooks error", err);
@@ -94,10 +113,10 @@ const Home: NextPage<Props> = (props) => {
         (city) => Number(id) == city.stateId
       );
       setFilteredCities(filterCityResult);
-      setSelectedCity('');
+      setSelectedCity("");
 
-      const cityResultIndex = filters.findIndex(f => f.field === 'city');
-      if(cityResultIndex){ 
+      const cityResultIndex = filters.findIndex((f) => f.field === "city");
+      if (cityResultIndex) {
         const newFilters = [...filters];
         newFilters.splice(cityResultIndex, 1);
 
@@ -158,34 +177,34 @@ const Home: NextPage<Props> = (props) => {
     const removed = arrayToRemove.splice(index, 1);
     const filterRemoved = removed[0];
 
-    if(filterRemoved.field === 'bookName') {
-      setSearchFilter('')
-    } else if(filterRemoved.field === 'state') {
-      setSelectedState('');
-    } else if(filterRemoved.field === 'city') {
-      setSelectedCity('');
+    if (filterRemoved.field === "bookName") {
+      setSearchFilter("");
+    } else if (filterRemoved.field === "state") {
+      setSelectedState("");
+    } else if (filterRemoved.field === "city") {
+      setSelectedCity("");
     }
 
     setFilters(arrayToRemove);
-  }
+  };
 
   const handleFilter = async () => {
     const filtersParams = {} as any;
-    
-    if(filters.length) {
-      filters.forEach(f => {
+
+    if (filters.length) {
+      filters.forEach((f) => {
         filtersParams[f.field] = f.value;
-      }) 
+      });
     }
 
     try {
-      console.log('filterparams', filtersParams);
+      console.log("filterparams", filtersParams);
       const response = await getFilteredBooks(filtersParams);
-      
+
       setBooks(response.data);
       updateFilters();
-    } catch(error) {
-      console.log('handleFilter', error);
+    } catch (error) {
+      console.log("handleFilter", error);
     }
   };
 
@@ -218,7 +237,11 @@ const Home: NextPage<Props> = (props) => {
                   <Text>Filtros selecionados:</Text>
 
                   {filters.map((filter, index) => (
-                    <FilterBadge key={filter.value} filterParams={filter} onRemove={() => onRemoveFilter(index)}/>
+                    <FilterBadge
+                      key={filter.value}
+                      filterParams={filter}
+                      onRemove={() => onRemoveFilter(index)}
+                    />
                   ))}
                 </VStack>
               )}
@@ -261,17 +284,26 @@ const Home: NextPage<Props> = (props) => {
             </VStack>
 
             <Flex direction="column" w="100%" alignItems="center">
-              {books.length > 0 ? (
-                <Grid templateColumns="1fr 1fr 1fr" gap="1.5rem" mb="8">
-                  {books.map((book) => (
-                    <BookListItem key={book.id} book={book} />
-                  ))}
-                </Grid>
+              {isLoading ? (
+                <Flex justifyContent="center" mt="6">
+                  <Spinner size="xl" />
+                </Flex>
               ) : (
-                <Text fontSize="lg" mt="8">
-                  
-                  {`Nenhum livro encontrado ${filters.length ? "para os filtros selecionados" : ""} ☹`} 
-                </Text>
+                <>
+                  {books.length > 0 ? (
+                    <Grid templateColumns="1fr 1fr 1fr" gap="1.5rem" mb="8">
+                      {books.map((book) => (
+                        <BookListItem key={book.id} book={book} />
+                      ))}
+                    </Grid>
+                  ) : (
+                    <Text fontSize="lg" mt="8">
+                      {`Nenhum livro encontrado ${
+                        filters.length ? "para os filtros selecionados" : ""
+                      } ☹`}
+                    </Text>
+                  )}
+                </>
               )}
 
               {/* <Flex justifyContent="center" mb="6">

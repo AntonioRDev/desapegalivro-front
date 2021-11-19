@@ -38,6 +38,7 @@ const BookDetails: NextPage<Props> = (props) => {
   const onAplly = () => {
     if(!isAuthenticaded) {
       router.push("/login");
+      return;
     }
     
     setApplicationModal(true);
