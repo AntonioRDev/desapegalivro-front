@@ -2,7 +2,11 @@ import * as React from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-const Map: React.FC = () => {
+type Props = {
+  mapCenter?: [number, number]
+}
+
+const Map: React.FC<Props> = (props) => {
   // this is where the map instance will be stored after initialization
   const [map, setMap] = React.useState<mapboxgl.Map>();
 
@@ -23,7 +27,7 @@ const Map: React.FC = () => {
       container: node,
       accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
       style: "mapbox://styles/mapbox/streets-v11",
-      center: [-74.5, 40],
+      center: props.mapCenter ? props.mapCenter:  [-74.5, 40],
       zoom: 9,
     });
 

@@ -22,9 +22,11 @@ import { DonatedBook } from "../../models/domain/DonatedBook";
 import ApplicationModal from "../../pages-components/BookDetails/ApplicationModal";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useRouter } from "next/router";
+import mbxGeocoding from "@mapbox/mapbox-sdk/services/geocoding";
 
 type Props = {
   book: DonatedBook;
+  mapCenter?: [number, number]
 };
 
 const BookDetails: NextPage<Props> = (props) => {
@@ -34,6 +36,13 @@ const BookDetails: NextPage<Props> = (props) => {
 
   const [book, setBook] = React.useState(props.book);
   const [isApplicationModalOpen, setApplicationModal] = React.useState(false);
+
+  React.useEffect(() => {
+    console.log(props.mapCenter)
+    if(props.mapCenter) {
+
+    }
+  }, [])
 
   const onAplly = () => {
     if(!isAuthenticaded) {
@@ -160,7 +169,7 @@ const BookDetails: NextPage<Props> = (props) => {
               </VStack>
             </Flex>
 
-            <Map />
+            <Map mapCenter={props.mapCenter}/>
           </Flex>
         </Flex>
       </Flex>
@@ -183,9 +192,14 @@ export const getServerSideProps: GetServerSideProps = async (
     const response = await getBookById(query.bookId);
     const book = response.data;
 
+    //map
+    const mapboxClient = mbxGeocoding({ accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!, });
+    const mapres = await mapboxClient.forwardGeocode({ query: "Contagem - Minas Gerais"}).send()
+
     return {
       props: {
         book,
+        mapCenter: mapres.body?.features?.length ? mapres.body.features[0].center : undefined
       },
     };
   }
