@@ -3,8 +3,8 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 type Props = {
-  mapCenter?: [number, number]
-}
+  mapCenter?: [number, number];
+};
 
 const Map: React.FC<Props> = (props) => {
   // this is where the map instance will be stored after initialization
@@ -27,7 +27,7 @@ const Map: React.FC<Props> = (props) => {
       container: node,
       accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
       style: "mapbox://styles/mapbox/streets-v11",
-      center: props.mapCenter ? props.mapCenter:  [-74.5, 40],
+      center: props.mapCenter ? props.mapCenter : [-53.1805, -14.2401],
       zoom: 9,
     });
 
@@ -39,7 +39,12 @@ const Map: React.FC<Props> = (props) => {
     };
   }, []);
 
-  return <div ref={mapNode} style={{ width: "100%", height: "100%", minHeight:'25rem' }} />;
+  return (
+    <div
+      ref={mapNode}
+      style={{ width: "100%", height: "100%", minHeight: "25rem" }}
+    />
+  );
 };
 
 export default Map;

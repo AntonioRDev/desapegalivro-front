@@ -193,8 +193,11 @@ export const getServerSideProps: GetServerSideProps = async (
     const book = response.data;
 
     //map
+    const address = book.user.address;
+    const formattedAddress = `${address.city} - ${address.uf}`;
+
     const mapboxClient = mbxGeocoding({ accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!, });
-    const mapres = await mapboxClient.forwardGeocode({ query: "Contagem - Minas Gerais"}).send()
+    const mapres = await mapboxClient.forwardGeocode({ query: formattedAddress}).send()
 
     return {
       props: {
