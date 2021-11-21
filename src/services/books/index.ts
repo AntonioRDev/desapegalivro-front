@@ -1,5 +1,6 @@
 import { DonatedBook } from "../../models/domain/DonatedBook";
 import { DonateBookRequestDto } from "../../models/dto/DonateBookRequestDto";
+import { GetBookByUser } from "../../models/dto/GetBookByUser.dto";
 import { GetFilteredBooksDtoRequest } from "../../models/dto/GetFilteredBooksDtoRequest";
 import desapegaApiClient from "../apis/desapega-api";
 
@@ -20,7 +21,7 @@ export const getFilteredBooks = async (filterParams: GetFilteredBooksDtoRequest)
 }
 
 export const getBookById = async (bookId: string) => {
-    return await desapegaApiClient().get<DonatedBook>(`/books/${bookId}`);
+    return await desapegaApiClient().get<GetBookByUser>(`/books/${bookId}`);
 }
 
 export const donate = async (donateBookDto: DonateBookRequestDto) => {

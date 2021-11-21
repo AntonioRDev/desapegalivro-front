@@ -89,12 +89,10 @@ const Home: NextPage<Props> = (props) => {
 
         if (userId) {
           const response = await getBooksWithoutUserBooks(userId);
-          console.log(response);
           setBooks(response.data);
         }
       } else {
         const response = await getBooks();
-        console.log(response);
         setBooks(response.data);
       }
     } catch (err) {
@@ -198,7 +196,6 @@ const Home: NextPage<Props> = (props) => {
     }
 
     try {
-      console.log("filterparams", filtersParams);
       const response = await getFilteredBooks(filtersParams);
 
       setBooks(response.data);

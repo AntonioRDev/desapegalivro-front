@@ -13,10 +13,12 @@ import {
   useTheme,
   VStack,
   Image,
+  FormControl,
+  FormErrorMessage,
+  Select,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect } from "react";
 import Layout from "../components/Layout";
-import Select from "../components/Select";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { parseCookies } from "nookies";
 import { getAllCategories } from "../services/category";
@@ -27,13 +29,48 @@ import { DonateBookRequestDto } from "../models/dto/DonateBookRequestDto";
 import { AuthContext } from "../contexts/AuthContext";
 import { donate } from "../services/books";
 import { useRouter } from "next/router";
+import * as yup from "yup";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useToast } from "@chakra-ui/react";
 
 type Props = {
   categories: Category[];
 };
 
+type FormValues = {
+  bookTitle: string;
+  usageTime: string;
+  author: string;
+  pagesQty: string;
+  selectedCategory: string;
+  selectedLanguage: string;
+};
+
+const validationSchema = yup.object().shape({
+  bookTitle: yup
+    .string()
+    .max(100)
+    .required("Você precisa preencher este campo"),
+  usageTime: yup
+    .string()
+    .max(100)
+    .required("Você precisa preencher este campo"),
+  author: yup.string().max(100).required("Você precisa preencher este campo"),
+  pagesQty: yup.string().max(100).required("Você precisa preencher este campo"),
+  selectedCategory: yup
+    .string()
+    .max(100)
+    .required("Você precisa preencher este campo"),
+  selectedLanguage: yup
+    .string()
+    .max(100)
+    .required("Você precisa preencher este campo"),
+});
+
 const Donate: NextPage<Props> = ({ categories }) => {
   const { sizes } = useTheme();
+  const toast = useToast();
   const router = useRouter();
   const { user } = useContext(AuthContext);
 
@@ -43,12 +80,15 @@ const Donate: NextPage<Props> = ({ categories }) => {
   );
 
   const [bookCoverUrl, setBookCoverUrl] = React.useState("");
-  const [bookTitle, setBookTitle] = React.useState("");
-  const [usageTime, setUsageTime] = React.useState("");
-  const [author, setAuthor] = React.useState("");
-  const [pagesQty, setPagesQty] = React.useState("");
-  const [selectedCategory, setSelectedCategory] = React.useState("");
-  const [selectedLanguage, setSelectedLanguage] = React.useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    resolver: yupResolver(validationSchema),
+    mode: "onBlur",
+  });
 
   useEffect(() => {
     if (selectedFiles && selectedFiles[0]) {
@@ -58,7 +98,29 @@ const Donate: NextPage<Props> = ({ categories }) => {
     }
   }, [selectedFiles]);
 
-  const handleDonation = async () => {
+  const handleDonation = async (data: FormValues) => {
+    if(!bookCoverUrl) {
+      toast({
+        title: "Sem imagem da capa",
+        description: "Você precisa enviar a imagem da capa do livro!",
+        status: "error",
+        position: "top-right",
+        duration: 4000,
+        isClosable: true,
+      });
+
+      return;
+    }
+
+    const {
+      selectedCategory,
+      bookTitle,
+      usageTime,
+      author,
+      pagesQty,
+      selectedLanguage,
+    } = data;
+
     if (!user) {
       return;
     }
@@ -76,12 +138,28 @@ const Donate: NextPage<Props> = ({ categories }) => {
         pagesQty: Number(pagesQty),
         language: selectedLanguage,
       };
-      
+
       await donate(payload);
-      
+
+      toast({
+        title: "Sucesso ao fazer cadastro de doação!",
+        description: "Você pode ver sua doação em: Minhas doações",
+        status: "success",
+        position: "top-right",
+        duration: 3000,
+        isClosable: true,
+      });
+
       router.push("/minhas-doacoes");
-      setLoading(false);
     } catch (error) {
+      toast({
+        title: "Erro ao fazer cadastro de livro",
+        description: "Ocorreu um erro. Tente novamente mais tarde.",
+        status: "error",
+        position: "top-right",
+        duration: 4000,
+        isClosable: true,
+      });
       console.log("handleDonation error", error);
     } finally {
       setLoading(false);
@@ -158,72 +236,104 @@ const Donate: NextPage<Props> = ({ categories }) => {
               </Flex>
             </Flex>
 
-            <HStack spacing="3" alignItems="flex-start" mb="6">
-              <VStack w="50%" spacing="3">
-                <Input
-                  placeholder="Título do livro"
-                  type="text"
-                  value={bookTitle}
-                  onChange={(e) => setBookTitle(e.target.value)}
-                />
+            <form onSubmit={handleSubmit(handleDonation)}>
+              <HStack spacing="3" alignItems="flex-start" mb="6">
+                <VStack w="50%" spacing="3">
+                  <FormControl isInvalid={!!errors.bookTitle}>
+                    <Input
+                      placeholder="Título do livro"
+                      type="text"
+                      {...register("bookTitle")}
+                    />
 
-                <Input
-                  placeholder="Tempo de uso"
-                  type="text"
-                  value={usageTime}
-                  onChange={(e) => setUsageTime(e.target.value)}
-                />
+                    <FormErrorMessage>
+                      {errors.bookTitle?.message}
+                    </FormErrorMessage>
+                  </FormControl>
 
-                <Input
-                  placeholder="Autor"
-                  type="text"
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                />
+                  <FormControl isInvalid={!!errors.usageTime}>
+                    <Input
+                      placeholder="Tempo de uso"
+                      type="text"
+                      {...register("usageTime")}
+                    />
 
-                <Input
-                  placeholder="Quantidade de Páginas"
-                  type="number"
-                  value={pagesQty}
-                  onChange={(e) => setPagesQty(e.target.value)}
-                />
-              </VStack>
+                    <FormErrorMessage>
+                      {errors.usageTime?.message}
+                    </FormErrorMessage>
+                  </FormControl>
 
-              <VStack w="50%" spacing="3">
-                <Select
-                  placeholder="Categoria"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  <FormControl isInvalid={!!errors.author}>
+                    <Input
+                      placeholder="Autor"
+                      type="text"
+                      {...register("author")}
+                    />
+
+                    <FormErrorMessage>
+                      {errors.author?.message}
+                    </FormErrorMessage>
+                  </FormControl>
+
+                  <FormControl isInvalid={!!errors.pagesQty}>
+                    <Input
+                      placeholder="Quantidade de Páginas"
+                      type="text"
+                      {...register("pagesQty")}
+                    />
+
+                    <FormErrorMessage>
+                      {errors.pagesQty?.message}
+                    </FormErrorMessage>
+                  </FormControl>
+                </VStack>
+
+                <VStack w="50%" spacing="3">
+                  <FormControl isInvalid={!!errors.selectedCategory}>
+                    <Select
+                      placeholder="Categoria"
+                      {...register("selectedCategory")}
+                    >
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </Select>
+
+                    <FormErrorMessage>
+                      {errors.selectedCategory?.message}
+                    </FormErrorMessage>
+                  </FormControl>
+
+                  <FormControl isInvalid={!!errors.selectedLanguage}>
+                    <Select
+                      placeholder="Idioma"
+                      {...register("selectedLanguage")}
+                    >
+                      <option>Português</option>
+                      <option>Inglês</option>
+                    </Select>
+
+                    <FormErrorMessage>
+                      {errors.selectedLanguage?.message}
+                    </FormErrorMessage>
+                  </FormControl>
+                </VStack>
+              </HStack>
+
+              <Flex justifyContent="center">
+                <Button
+                  bgColor="primary"
+                  color="white"
+                  type="submit"
+                  isLoading={isLoading}
+                  isDisabled={!isValid || isLoading}
                 >
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </Select>
-
-                <Select
-                  placeholder="Idioma"
-                  value={selectedLanguage}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
-                >
-                  <option>Português</option>
-                  <option>Inglês</option>
-                </Select>
-              </VStack>
-            </HStack>
-
-            <Flex justifyContent="center">
-              <Button
-                bgColor="primary"
-                color="white"
-                onClick={handleDonation}
-                isLoading={isLoading}
-                isDisabled={isLoading}
-              >
-                Cadastrar livro para doação
-              </Button>
-            </Flex>
+                  Cadastrar livro para doação
+                </Button>
+              </Flex>
+            </form>
           </Flex>
         </Flex>
       </Flex>

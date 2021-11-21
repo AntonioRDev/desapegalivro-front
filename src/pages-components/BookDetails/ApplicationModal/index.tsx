@@ -16,6 +16,7 @@ import { DonatedBook } from "../../../models/domain/DonatedBook";
 import { applyToReceiveBook } from "../../../services/application";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { useRouter } from "next/router";
+import { useToast } from "@chakra-ui/react";
 
 type Props = {
   book: DonatedBook;
@@ -26,14 +27,27 @@ type Props = {
 const ApplicationModal: React.FC<Props> = ({ book, isOpen, onClose }) => {
   const { user } = useContext(AuthContext);
   const router = useRouter();
+  const toast = useToast();
 
   const [description, setDescription] = React.useState("");
   const [isLoading, setLoading] = React.useState(false);
 
   const handleApply = async () => {
-    if (!description || !user) {
-      //TODO: toast
+    if(!user) {
       onClose();
+      return;
+    }
+
+    if (!description) {
+      toast({
+        title: "Campo vazio",
+        description: "Escreva o porque você deseja receber esta doação",
+        status: "error",
+        position: "top-right",
+        duration: 4000,
+        isClosable: true
+      });
+
       return;
     }
 
@@ -47,12 +61,29 @@ const ApplicationModal: React.FC<Props> = ({ book, isOpen, onClose }) => {
         contact: user.phone,
       };
 
-      const response = await applyToReceiveBook(params);
+      await applyToReceiveBook(params);
+
+      toast({
+        title: "Sucesso ao se candidatar!",
+        description: "Você pode ver sua candidatura em: Minhas candidaturas",
+        status: "success",
+        position: "top-right",
+        duration: 3000,
+        isClosable: true,
+      });
+
       setLoading(false);
       router.push("/minhas-candidaturas");
-      console.log("response", response);
     } catch (error) {
       console.log("handleApply error", error);
+      toast({
+        title: "Erro ao se candidatar",
+        description: "Ocorreu algum erro ao se candidatar, tente novamente mais tarde",
+        status: "error",
+        position: "top-right",
+        duration: 4000,
+        isClosable: true,
+      });
     } finally {
       setLoading(false);
     }

@@ -18,15 +18,17 @@ import { ChevronRightIcon } from "@chakra-ui/icons";
 import Map from "../../pages-components/BookDetails/Map";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { getBookById } from "../../services/books";
-import { DonatedBook } from "../../models/domain/DonatedBook";
 import ApplicationModal from "../../pages-components/BookDetails/ApplicationModal";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useRouter } from "next/router";
 import mbxGeocoding from "@mapbox/mapbox-sdk/services/geocoding";
+import { GetBookByUser } from "../../models/dto/GetBookByUser.dto";
+import { parseCookies } from "nookies";
 
 type Props = {
-  book: DonatedBook;
-  mapCenter?: [number, number]
+  book: GetBookByUser;
+  isUserAlreadyApplied: boolean;
+  mapCenter?: [number, number];
 };
 
 const BookDetails: NextPage<Props> = (props) => {
@@ -37,21 +39,14 @@ const BookDetails: NextPage<Props> = (props) => {
   const [book, setBook] = React.useState(props.book);
   const [isApplicationModalOpen, setApplicationModal] = React.useState(false);
 
-  React.useEffect(() => {
-    console.log(props.mapCenter)
-    if(props.mapCenter) {
-
-    }
-  }, [])
-
   const onAplly = () => {
-    if(!isAuthenticaded) {
+    if (!isAuthenticaded) {
       router.push("/login");
       return;
     }
-    
+
     setApplicationModal(true);
-  }
+  };
 
   return (
     <Layout>
@@ -112,7 +107,10 @@ const BookDetails: NextPage<Props> = (props) => {
 
               <VStack spacing="2" alignItems="flex-start" pl="6">
                 <Text>
-                  Categoria: <Badge colorScheme="green"><b>{book.category.name}</b></Badge>
+                  Categoria:{" "}
+                  <Badge colorScheme="green">
+                    <b>{book.category.name}</b>
+                  </Badge>
                 </Text>
 
                 <Text>
@@ -133,8 +131,15 @@ const BookDetails: NextPage<Props> = (props) => {
               </VStack>
 
               <Flex justifyContent="center" w="100%">
-                <Button bgColor="primary" color="white" onClick={onAplly}>
-                  Candidatar para receber
+                <Button
+                  bgColor="primary"
+                  color="white"
+                  onClick={onAplly}
+                  disabled={props.isUserAlreadyApplied}
+                >
+                  {props.isUserAlreadyApplied
+                    ? "Você já se candidatou para receber esse livro!"
+                    : "Candidatar para receber"}
                 </Button>
               </Flex>
             </Flex>
@@ -169,7 +174,7 @@ const BookDetails: NextPage<Props> = (props) => {
               </VStack>
             </Flex>
 
-            <Map mapCenter={props.mapCenter}/>
+            <Map mapCenter={props.mapCenter} />
           </Flex>
         </Flex>
       </Flex>
@@ -187,6 +192,8 @@ export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   const { query } = context;
+  const { desapegatoken } = parseCookies(context);
+  let isUserAlreadyApplied = false;
 
   if (query.bookId && typeof query.bookId === "string") {
     const response = await getBookById(query.bookId);
@@ -196,13 +203,34 @@ export const getServerSideProps: GetServerSideProps = async (
     const address = book.user.address;
     const formattedAddress = `${address.city} - ${address.uf}`;
 
-    const mapboxClient = mbxGeocoding({ accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!, });
-    const mapres = await mapboxClient.forwardGeocode({ query: formattedAddress}).send()
+    const mapboxClient = mbxGeocoding({
+      accessToken: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!,
+    });
+    const mapres = await mapboxClient
+      .forwardGeocode({ query: formattedAddress })
+      .send();
+
+
+    //Application check
+    if (desapegatoken) {
+      const { userId } = JSON.parse(desapegatoken);
+
+      const userApplications = book.applications.filter(
+        (application) => application.userId === userId
+      );
+
+      if (userApplications && userApplications.length) {
+        isUserAlreadyApplied = true;
+      }
+    }
 
     return {
       props: {
         book,
-        mapCenter: mapres.body?.features?.length ? mapres.body.features[0].center : undefined
+        isUserAlreadyApplied,
+        mapCenter: mapres.body?.features?.length
+          ? mapres.body.features[0].center
+          : undefined,
       },
     };
   }
